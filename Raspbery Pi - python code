@@ -1,6 +1,6 @@
 import time
 import random
-#import datetime
+
 import telepot
 import serial
 from picamera import PiCamera
@@ -11,9 +11,29 @@ from telepot.loop import MessageLoop
 - `/data` - reply with the sensor data.
 - `/photo` - reply with a photo.
 """
-
 camera = PiCamera()
 camera.rotation = 180
+
+data = 'Humidity (%): 24.00 \n Temperature DHT (C): 33.00 \n Temperature KY (C): 32.49'
+Humidity = data[14:19]
+Temperature = data[42:48]
+
+#from apscheduler.schedulers.blocking import BlockingScheduler
+
+#sched = BlockingScheduler()
+#data = 'Humidity (%): 24.00 \n Temperature DHT (C): 33.00 \n Temperature KY (C): 32.49'
+#Humidity = data[14:19]
+#Temperature = data[43:48]
+
+
+#@sched.scheduled_job('interval', seconds=6)
+#def timed_job():
+#    print(Humidity)
+#    print(Temperature)
+
+#sched.start()
+
+
 def handle(msg):
     chat_id = msg['chat']['id']
     command = msg['text']
