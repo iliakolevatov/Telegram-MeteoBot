@@ -6,3 +6,6 @@ Arduino UNO is used as a data acquisition module to send data from sensors DHT11
   DHT11 pin 4
 Raspberry Pi night vision camera is connected directly to Raspberry via camera-socket.
 
+Commands:
+/data - read and send data from sensors
+/photo - make and send a photo
