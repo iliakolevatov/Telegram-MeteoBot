@@ -21,7 +21,7 @@ def handle(msg):
     print ('Got command: %s' % command)
 
     if command == '/data':
-        ser = serial.Serial("/dev/ttyACM0",9600)
+        ser = serial.Serial("/dev/ttyACM0",9600) # first, you should check the serial port of arduino.
         data = ser.read(size=75)
         bot.sendMessage(chat_id, data)
     elif command == '/photo':
@@ -37,7 +37,7 @@ def handle(msg):
     #    camera.stop_recording()
     #    bot.sendVideo(chat_id, open('/home/pi/Desktop/video.h264', 'rb'))
         
-bot = telepot.Bot('TYPE_IN_BOT_TOKEN_HERE')
+bot = telepot.Bot('TYPE_IN_BOT_TOKEN_HERE') # copy-paste a bot token here.
 
 MessageLoop(bot, handle).run_as_thread()
 print ('I am listening ...')
