@@ -1,0 +1,47 @@
+import time
+import random
+#import datetime
+import telepot
+import serial
+from picamera import PiCamera
+from time import sleep
+from telepot.loop import MessageLoop
+
+"""
+- `/data` - reply with the sensor data.
+- `/photo` - reply with a photo.
+"""
+
+camera = PiCamera()
+camera.rotation = 180
+def handle(msg):
+    chat_id = msg['chat']['id']
+    command = msg['text']
+
+    print ('Got command: %s' % command)
+
+    if command == '/data':
+        ser = serial.Serial("/dev/ttyACM0",9600)
+        data = ser.read(size=75)
+        bot.sendMessage(chat_id, data)
+    elif command == '/photo':
+        camera.start_preview()
+        sleep(5)
+        camera.capture('/home/pi/Desktop/Py-image.jpg')
+        camera.stop_preview()
+        bot.sendPhoto(chat_id, open('/home/pi/Desktop/Py-image.jpg', 'rb'))
+    #elif command == '/video':
+    #    camera.start_preview()
+    #    camera.start_recording('/home/pi/Desktop/video.h264')
+    #    sleep(1)
+    #    camera.stop_recording()
+    #    bot.sendVideo(chat_id, open('/home/pi/Desktop/video.h264', 'rb'))
+        
+bot = telepot.Bot('TYPE_IN_BOT_TOKEN_HERE')
+
+MessageLoop(bot, handle).run_as_thread()
+print ('I am listening ...')
+
+while 1:
+    time.sleep(10)
+
