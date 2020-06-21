@@ -8,7 +8,9 @@ Arduino UNO is used as a data acquisition module to send data from sensors DHT11
 Raspberry Pi night vision camera is connected directly to Raspberry via camera-socket.
 
 Upd1: The Raspberry temperature is also monitored
+
 Upd2: MeteoBot communicates only with an allowed user list
+
 ## Commands:
  *  */data* - read and send data from sensors
  *  */photo* - make and send a photo
