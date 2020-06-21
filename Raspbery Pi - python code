@@ -12,30 +12,39 @@ from telepot.loop import MessageLoop
 - `/photo` - reply with a photo.
 """
 
+# camera settings
 camera = PiCamera()
 camera.rotation = 180
+# camera settings
+
+id_a = [123456, 789123456] # the list of legal chat_id's
+
+def measure_temp(): # Check the temperature of Raspberry
+        temp = os.popen("vcgencmd measure_temp").readline()
+        return (temp[5:9]) # return temperature in C
+
+
 def handle(msg):
     chat_id = msg['chat']['id']
     command = msg['text']
-
+    sender = msg['from']['id']
+    
     print ('Got command: %s' % command)
-
-    if command == '/data':
-        ser = serial.Serial("/dev/ttyACM0",9600) # first, you should check the serial port of arduino.
-        data = ser.read(size=75)
-        bot.sendMessage(chat_id, data)
-    elif command == '/photo':
-        camera.start_preview()
-        sleep(5)
-        camera.capture('/home/pi/Desktop/Py-image.jpg')
-        camera.stop_preview()
-        bot.sendPhoto(chat_id, open('/home/pi/Desktop/Py-image.jpg', 'rb'))
-    #elif command == '/video':
-    #    camera.start_preview()
-    #    camera.start_recording('/home/pi/Desktop/video.h264')
-    #    sleep(1)
-    #    camera.stop_recording()
-    #    bot.sendVideo(chat_id, open('/home/pi/Desktop/video.h264', 'rb'))
+    if sender in id_a:
+        if command == '/data':
+            ser = serial.Serial("/dev/ttyACM0",9600)
+            data = str(ser.read(size=75))
+            Message = 'Humidity = '+ data[15:21] + ' %' + '\n' +'Temperature DHT = ' + data[46:51] + ' \u2103' +'\n'+'Temperature KY = ' + data[74:80] + ' \u2103' + '\n'+'Temperature Core = ' + measure_temp() + ' \u2103'
+            bot.sendMessage(chat_id, Message)
+        elif command == '/photo':
+            camera.start_preview()
+            sleep(5)
+            camera.capture('/home/pi/Desktop/Py-image.jpg')
+            camera.stop_preview()
+            bot.sendPhoto(chat_id, open('/home/pi/Desktop/Py-image.jpg', 'rb'))
+    else: 
+        bot.sendMessage(chat_id, 'Forbidden access! Your ID is ')
+        bot.sendMessage(chat_id, sender)
         
 bot = telepot.Bot('TYPE_IN_BOT_TOKEN_HERE') # copy-paste a bot token here.
 
