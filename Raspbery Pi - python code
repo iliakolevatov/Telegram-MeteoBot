@@ -1,19 +1,39 @@
 import time
 import random
-#import datetime
 import telepot
 import serial
 from picamera import PiCamera
 from time import sleep
 from telepot.loop import MessageLoop
+from datetime import datetime
+import csv
+from gpiozero import CPUTemperature
+
 
 """
 - `/data` - reply with the sensor data.
 - `/photo` - reply with a photo.
 """
-
 camera = PiCamera()
 camera.rotation = 180
+
+
+def Serial_to_CSV(data_path):
+    ser = serial.Serial("/dev/ttyUSB0",9600)
+    data = str(ser.read(size=75))
+    Humidity = data[16:21]
+    Temperature_DHT = data[46:51]
+    Temperature_KY = data[75:80]
+    cpu = CPUTemperature()
+    Temperature_CPU = cpu.temperature
+    now = datetime.now() 
+    date_time = now.strftime("%d.%m.%Y %H:%M:%S")
+    row_list = [[date_time, Humidity,Temperature_DHT,Temperature_KY, Temperature_CPU]]
+    with open(data_path, 'a', newline='') as file:
+        writer = csv.writer(file, delimiter='\t')
+        writer.writerows(row_list)
+
+
 def handle(msg):
     chat_id = msg['chat']['id']
     command = msg['text']
@@ -21,23 +41,27 @@ def handle(msg):
     print ('Got command: %s' % command)
 
     if command == '/data':
-        ser = serial.Serial("/dev/ttyACM0",9600) # first, you should check the serial port of arduino.
-        data = ser.read(size=75)
-        bot.sendMessage(chat_id, data)
+        ser = serial.Serial("/dev/ttyUSB0",9600)
+        data = str(ser.read(size=75))
+        Humidity = data[16:21]
+        Temperature_DHT = data[46:51]
+        Temperature_KY = data[75:80]
+        cpu = CPUTemperature()
+        Temperature_CPU = str(cpu.temperature)
+        Message= Message='Humidity (%) = '+ Humidity+'\n'+'Temperature DHT (C) = '+Temperature_DHT+'\n'+'Temperature KY (C) = '+Temperature_KY+'\n'+'Temperature CPU (C) = '+Temperature_CPU[:-1]
+        bot.sendMessage(chat_id, Message)   
+        Serial_to_CSV('/home/pi/Documents/Python/TeleMeteoBot_Data/Data_ROOM_CPU.csv')
     elif command == '/photo':
         camera.start_preview()
         sleep(5)
-        camera.capture('/home/pi/Desktop/Py-image.jpg')
+        now = datetime.now() 
+        date_time = now.strftime("%d.%m.%Y %H:%M:%S")
+        pict_path='/home/pi/Documents/Python/TeleMeteoBot_Data/'+date_time+'.jpg'
+        camera.capture(pict_path)
         camera.stop_preview()
-        bot.sendPhoto(chat_id, open('/home/pi/Desktop/Py-image.jpg', 'rb'))
-    #elif command == '/video':
-    #    camera.start_preview()
-    #    camera.start_recording('/home/pi/Desktop/video.h264')
-    #    sleep(1)
-    #    camera.stop_recording()
-    #    bot.sendVideo(chat_id, open('/home/pi/Desktop/video.h264', 'rb'))
+        bot.sendPhoto(chat_id, open(pict_path, 'rb'))
         
-bot = telepot.Bot('TYPE_IN_BOT_TOKEN_HERE') # copy-paste a bot token here.
+bot = telepot.Bot('1197957471:AAFanlkPITYxKa07IG1I404AtLOZiFu9G40') # copy-paste a bot token here.
 
 MessageLoop(bot, handle).run_as_thread()
 print ('I am listening ...')
