@@ -16,7 +16,7 @@ from gpiozero import CPUTemperature
 """
 camera = PiCamera()
 camera.rotation = 180
-id_a = [166289171,884511051]
+id_a = [11111,11111,22222,23333] # <--- the list of users with the access
 
 def Serial_to_CSV(data_path):
     ser = serial.Serial("/dev/ttyUSB0",9600)
