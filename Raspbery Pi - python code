@@ -61,7 +61,7 @@ def handle(msg):
         camera.stop_preview()
         bot.sendPhoto(chat_id, open(pict_path, 'rb'))
         
-bot = telepot.Bot('1197957471:AAFanlkPITYxKa07IG1I404AtLOZiFu9G40') # copy-paste a bot token here.
+bot = telepot.Bot('PASTE_TOKEN_HERE') # copy-paste a bot token here.
 
 MessageLoop(bot, handle).run_as_thread()
 print ('I am listening ...')
