@@ -16,7 +16,7 @@ from gpiozero import CPUTemperature
 """
 camera = PiCamera()
 camera.rotation = 180
-
+id_a = [166289171,884511051]
 
 def Serial_to_CSV(data_path):
     ser = serial.Serial("/dev/ttyUSB0",9600)
@@ -37,31 +37,36 @@ def Serial_to_CSV(data_path):
 def handle(msg):
     chat_id = msg['chat']['id']
     command = msg['text']
-
+    sender = msg['from']['id']
     print ('Got command: %s' % command)
-
-    if command == '/data':
-        ser = serial.Serial("/dev/ttyUSB0",9600)
-        data = str(ser.read(size=75))
-        Humidity = data[16:21]
-        Temperature_DHT = data[46:51]
-        Temperature_KY = data[75:80]
-        cpu = CPUTemperature()
-        Temperature_CPU = str(cpu.temperature)
-        Message= Message='Humidity (%) = '+ Humidity+'\n'+'Temperature DHT (C) = '+Temperature_DHT+'\n'+'Temperature KY (C) = '+Temperature_KY+'\n'+'Temperature CPU (C) = '+Temperature_CPU[:-1]
-        bot.sendMessage(chat_id, Message)   
-        Serial_to_CSV('/home/pi/Documents/Python/TeleMeteoBot_Data/Data_ROOM_CPU.csv')
-    elif command == '/photo':
-        camera.start_preview()
-        sleep(5)
-        now = datetime.now() 
-        date_time = now.strftime("%d.%m.%Y %H:%M:%S")
-        pict_path='/home/pi/Documents/Python/TeleMeteoBot_Data/'+date_time+'.jpg'
-        camera.capture(pict_path)
-        camera.stop_preview()
-        bot.sendPhoto(chat_id, open(pict_path, 'rb'))
-        
-bot = telepot.Bot('PASTE_TOKEN_HERE') # copy-paste a bot token here.
+    if sender in id_a:
+        if command == '/data':
+            ser = serial.Serial("/dev/ttyUSB0",9600)
+            data = str(ser.read(size=75))
+            Humidity = data[16:21]
+            Temperature_DHT = data[46:51]
+            Temperature_KY = data[75:80]
+            cpu = CPUTemperature()
+            Temperature_CPU = str(cpu.temperature)
+            Message= Message='Humidity (%) = '+ Humidity+'\n'+'Temperature DHT (C) = '+Temperature_DHT+'\n'+'Temperature KY (C) = '+Temperature_KY+'\n'+'Temperature CPU (C) = '+Temperature_CPU[:-1]
+            bot.sendMessage(chat_id, Message)   
+            Serial_to_CSV('/home/pi/Documents/Python/TeleMeteoBot_Data/Data_ROOM_CPU.csv')
+        elif command == '/photo':
+            camera.start_preview()
+            sleep(5)
+            now = datetime.now() 
+            date_time = now.strftime("%d.%m.%Y %H:%M:%S")
+            pict_path='/home/pi/Documents/Python/TeleMeteoBot_Data/'+date_time+'.jpg'
+            camera.capture(pict_path)
+            camera.stop_preview()
+            bot.sendPhoto(chat_id, open(pict_path, 'rb'))
+    else:
+        bot.sendMessage(chat_id, 'Forbidden access!')
+        bot.sendMessage(chat_id, sender)
+        with open('/home/pi/Documents/Python/TeleMeteoBot_Data/Access_attempt.csv', 'a', newline='') as file:
+            writer = csv.writer(file, delimiter='\t')
+            writer.writerows([[sender]])
+bot = telepot.Bot('1197957471:AAFanlkPITYxKa07IG1I404AtLOZiFu9G40') # copy-paste a bot token here.
 
 MessageLoop(bot, handle).run_as_thread()
 print ('I am listening ...')
